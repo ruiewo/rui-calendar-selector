@@ -37,6 +37,10 @@
   padding: 6px 0;
   flex-grow: 1;
 }
+.rui-groups li span:hover {
+  background-color: rgba(32,33,36,.04);
+  cursor: pointer;
+}
 
 .rui-groups .deleteButton {
   position: relative;
@@ -60,6 +64,23 @@
   background-repeat: no-repeat;
 }
 .rui-groups .deleteButton:hover {
-  background-color: gainsboro;
+  background-color: rgba(32,33,36,.06);
+  cursor: pointer;
+}
+
+.rui-groups .addRow {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+.rui-groups .addButton {
+  display: inline-block;
+  height: 20px;
+  width: 80px;
+  border-radius: 10px;
+  border: solid 1px #a3a3a3;
+}
+.rui-groups .addButton:hover {
+  background-color: rgba(32,33,36,.04);
   cursor: pointer;
 }
