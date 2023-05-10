@@ -14,5 +14,11 @@
       "css": ["index.css"]
     }
   ],
-  "permissions": ["storage"]
+  "permissions": ["storage"],
+  "web_accessible_resources": [
+    {
+      "resources": ["*.svg"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

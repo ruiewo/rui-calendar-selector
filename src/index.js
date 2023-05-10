@@ -1,41 +1,16 @@
 console.log('-----------rui-calendar-selector start-----------');
 
-if (true) {
-  const panel = document.createElement('div');
-  panel.classList.add('micraperPanel');
-
-  const selectButton = document.createElement('button');
-  selectButton.textContent = '選択！';
-  selectButton.onclick = (e) => {
-    // e.stopPropagation();
-    // document.body.classList.add('micraper');
-    // document.body.addEventListener('click', select);
-    select();
-  };
-  panel.appendChild(selectButton);
-  const description1 = document.createElement('p');
-  description1.innerHTML = 'output console<br>';
-  panel.appendChild(description1);
-
-  const closeButton = document.createElement('button');
-  closeButton.textContent = 'Close';
-  closeButton.onclick = (e) => {
-    panel.remove();
-  };
-  panel.appendChild(closeButton);
-
-  document.body.appendChild(panel);
+async function main() {
+  const calendarDiv =
+    document.querySelector('[jsname="Hostde"]')?.parentElement;
+  calendarDiv.parentNode.insertBefore(await createSelect(), calendarDiv);
 }
 
-function select() {
+function updateCalendarState(list = ['Toshiaki Wada', 'ToDo リスト']) {
   console.log('start!!!');
   const { myCalendars, otherCalendars } = getCalendars();
-  // const list = storage.getList();
-  const list = ['Toshiaki Wada', 'ToDo リスト'];
-  console.log(myCalendars);
 
   for (const [name, dom] of myCalendars) {
-    // console.log(name, list.includes(name), `[${name}]`);
     setState(dom, list.includes(name));
   }
 
@@ -73,36 +48,61 @@ function getState(calendar) {
   return calendar.querySelector('input').checked;
 }
 
-function createSelect() {
-  //
-  // const list = storage.getList();
-  const calendarNames = [
-    { label: 'hoge', list: ['Toshiaki Wada', 'ToDo リスト'] },
-    { label: 'hoge2', list: ['Toshiaki Wada', 'ToDo リスト'] },
-  ];
+async function createSelect() {
+  const groups = await storage.getGroups();
 
-  let html = `<ul>`;
-  for (const { label, list } of calendarNames) {
-    html += `<li><span>${label}</span><button>delete</button></li>`;
+  const ul = document.createElement('ul');
+  ul.classList.add('rui-calendar');
+  for (const { label, list } of groups) {
+    const li = document.createElement('li');
+
+    const span = document.createElement('span');
+    span.textContent = label;
+    span.onclick = () => updateCalendarState(list);
+
+    const button = document.createElement('div');
+    button.classList.add('deleteButton');
+    button.onclick = () => console.log(label);
+
+    li.appendChild(span);
+    li.appendChild(button);
+
+    ul.appendChild(li);
   }
-  html += `</ul>`;
+
+  const header = document.createElement('div');
+  header.textContent = `Calendar Group`;
+  header.classList.add('rui-header');
+
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(header);
+  wrapper.appendChild(ul);
+
+  return wrapper;
 }
 
 const storage = (() => {
-  //
-  const listKey = 'listKey';
-  async function getList() {
-    const data = await chrome.storage.sync.get(listKey);
+  const calendarGroupKey = 'calendarGroupKey';
+  async function getGroups() {
+    // const data = await chrome.storage.sync.get(calendarGroupKey);
+    // return data[calendarGroupKey];
 
-    return data[listKey];
+    const groups = [
+      { label: 'hoge', list: ['sample1', 'sample2'] },
+      { label: 'hoge2', list: ['sample2', 'sample3'] },
+    ];
+
+    return groups;
   }
 
-  async function saveList(list) {
-    await chrome.storage.sync.set({ [listKey]: list });
+  async function saveGroups(list) {
+    await chrome.storage.sync.set({ [calendarGroupKey]: list });
   }
 
   return {
-    getList,
-    saveList,
+    getGroups,
+    saveGroups,
   };
 })();
+
+main();
