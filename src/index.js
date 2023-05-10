@@ -45,14 +45,19 @@ const ui = (() => {
     ul.classList.add('rui-groups')
     for (const { groupName, list } of groups) {
       const li = document.createElement('li')
+      li.onclick = (e) => {
+        if (e.target.closest('.deleteButton')) {
+          deleteGroup(groupName)
+        } else {
+          updateCalendarState(list)
+        }
+      }
 
       const span = document.createElement('span')
       span.textContent = groupName
-      span.onclick = () => updateCalendarState(list)
 
       const button = document.createElement('div')
       button.classList.add('deleteButton')
-      button.onclick = () => deleteGroup(groupName)
 
       li.appendChild(span)
       li.appendChild(button)
