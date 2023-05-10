@@ -9,7 +9,7 @@
   height: 42px;
 }
 
-.rui-calendar {
+.rui-groups {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -19,7 +19,7 @@
   padding: 0 40px;
 }
 
-.rui-calendar li {
+.rui-groups li {
   display: flex;
   flex-direction: row;
   width: 100%;
@@ -29,7 +29,7 @@
   margin: 0;
 }
 
-.rui-calendar li span {
+.rui-groups li span {
   display: inline-block;
   font-size: 14px;
   font-weight: 400;
@@ -38,14 +38,14 @@
   flex-grow: 1;
 }
 
-.rui-calendar .deleteButton {
+.rui-groups .deleteButton {
   position: relative;
   display: inline-block;
   height: 28px;
   width: 28px;
   border-radius: 50%;
 }
-.rui-calendar .deleteButton::after {
+.rui-groups .deleteButton::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -59,7 +59,7 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
-.rui-calendar .deleteButton:hover {
+.rui-groups .deleteButton:hover {
   background-color: gainsboro;
   cursor: pointer;
 }

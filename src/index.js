@@ -1,108 +1,138 @@
-console.log('-----------rui-calendar-selector start-----------');
+console.log('-----------rui-calendar-selector start-----------')
 
 async function main() {
-  const calendarDiv =
-    document.querySelector('[jsname="Hostde"]')?.parentElement;
-  calendarDiv.parentNode.insertBefore(await createSelect(), calendarDiv);
-}
-
-function updateCalendarState(list = ['Toshiaki Wada', 'ToDo リスト']) {
-  console.log('start!!!');
-  const { myCalendars, otherCalendars } = getCalendars();
-
-  for (const [name, dom] of myCalendars) {
-    setState(dom, list.includes(name));
-  }
-
-  for (const [name, dom] of otherCalendars) {
-    setState(dom, list.includes(name));
-  }
+  await render(true)
 }
 
 function getCalendars() {
-  const wrapper = document.querySelector('div[role="complementary"]');
-  const [myList, otherList] = document.querySelectorAll(`[role="list"]`);
-  const myCalendarDoms = myList.children;
-  const otherCalendarDoms = otherList.children;
-  const myCalendars = new Map();
-  for (const cal of myCalendarDoms) {
-    myCalendars.set(cal.querySelector('span').textContent, cal);
+  const [myList, otherList] = document.querySelectorAll(`[role="list"]`)
+  return [...myList.children, ...otherList.children]
+}
+
+function updateCalendarState(list = []) {
+  for (const dom of getCalendars()) {
+    setState(dom, list.includes(dom.querySelector('span').textContent))
+  }
+}
+
+function getActiveCalendars() {
+  const activeList = []
+  for (const cal of getCalendars()) {
+    if (cal.querySelector('input').checked) {
+      activeList.push(cal.querySelector('span').textContent)
+    }
   }
 
-  const otherCalendars = new Map();
-  for (const cal of otherCalendarDoms) {
-    otherCalendars.set(cal.querySelector('span').textContent, cal);
-  }
-
-  return { myCalendars, otherCalendars };
+  return activeList
 }
 
 function setState(calendar, state) {
-  const checkbox = calendar.querySelector('input');
+  const checkbox = calendar.querySelector('input')
   if (state !== checkbox.checked) {
-    checkbox.click();
+    checkbox.click()
   }
 }
 
-function getState(calendar) {
-  return calendar.querySelector('input').checked;
+async function render(isInit = false) {
+  const groups = await storage.getGroups()
+
+  const ul = document.createElement('ul')
+  ul.classList.add('rui-groups')
+  for (const { groupName, list } of groups) {
+    const li = document.createElement('li')
+
+    const span = document.createElement('span')
+    span.textContent = groupName
+    span.onclick = () => updateCalendarState(list)
+
+    const button = document.createElement('div')
+    button.classList.add('deleteButton')
+    button.onclick = () => deleteGroup(groupName)
+
+    li.appendChild(span)
+    li.appendChild(button)
+
+    ul.appendChild(li)
+  }
+  const addButton = document.createElement('li')
+  addButton.classList.add('addButton')
+  addButton.textContent = 'save as'
+  addButton.onclick = addGroup
+  ul.appendChild(addButton)
+
+  const header = document.createElement('div')
+  header.textContent = `Calendar Group`
+  header.classList.add('rui-header')
+
+  let wrapper
+  if (isInit) {
+    wrapper = document.createElement('div')
+    wrapper.id = 'rui-calendar-selector'
+  } else {
+    wrapper = document.getElementById('rui-calendar-selector')
+    wrapper.replaceChildren()
+  }
+  wrapper.appendChild(header)
+  wrapper.appendChild(ul)
+
+  if (isInit) {
+    const wrapper = document.createElement('div')
+    wrapper.id = 'rui-calendar-selector'
+    wrapper.appendChild(header)
+    wrapper.appendChild(ul)
+
+    const calendarDiv = document.querySelector('[jsname="Hostde"]').parentElement
+    calendarDiv.parentNode.insertBefore(wrapper, calendarDiv)
+  } else {
+    const wrapper = document.getElementById('rui-calendar-selector')
+    wrapper.replaceChildren()
+    wrapper.appendChild(header)
+    wrapper.appendChild(ul)
+  }
 }
 
-async function createSelect() {
-  const groups = await storage.getGroups();
-
-  const ul = document.createElement('ul');
-  ul.classList.add('rui-calendar');
-  for (const { label, list } of groups) {
-    const li = document.createElement('li');
-
-    const span = document.createElement('span');
-    span.textContent = label;
-    span.onclick = () => updateCalendarState(list);
-
-    const button = document.createElement('div');
-    button.classList.add('deleteButton');
-    button.onclick = () => console.log(label);
-
-    li.appendChild(span);
-    li.appendChild(button);
-
-    ul.appendChild(li);
+async function addGroup() {
+  const groupName = window.prompt('Please enter a group name.')
+  if (groupName) {
+    await storage.addGroup(groupName, getActiveCalendars())
   }
+  await render()
+}
 
-  const header = document.createElement('div');
-  header.textContent = `Calendar Group`;
-  header.classList.add('rui-header');
-
-  const wrapper = document.createElement('div');
-  wrapper.appendChild(header);
-  wrapper.appendChild(ul);
-
-  return wrapper;
+async function deleteGroup(groupName) {
+  await storage.deleteGroup(groupName, getActiveCalendars())
+  await render()
 }
 
 const storage = (() => {
-  const calendarGroupKey = 'calendarGroupKey';
+  const calendarGroupKey = 'calendarGroupKey'
+
   async function getGroups() {
-    // const data = await chrome.storage.sync.get(calendarGroupKey);
-    // return data[calendarGroupKey];
-
-    const groups = [
-      { label: 'hoge', list: ['sample1', 'sample2'] },
-      { label: 'hoge2', list: ['sample2', 'sample3'] },
-    ];
-
-    return groups;
+    const data = await chrome.storage.sync.get(calendarGroupKey)
+    return data[calendarGroupKey]
   }
 
-  async function saveGroups(list) {
-    await chrome.storage.sync.set({ [calendarGroupKey]: list });
+  async function addGroup(groupName, list) {
+    const groups = await getGroups()
+    groups.push({ groupName, list })
+
+    await saveGroups(groups)
+  }
+
+  async function deleteGroup(deleteGroupName) {
+    const groups = await getGroups()
+    await saveGroups(groups.filter(({ groupName }) => groupName !== deleteGroupName))
+  }
+
+  async function saveGroups(groups) {
+    await chrome.storage.sync.set({ [calendarGroupKey]: groups })
   }
 
   return {
     getGroups,
-    saveGroups,
-  };
-})();
+    addGroup,
+    deleteGroup,
+  }
+})()
 
-main();
+main()
