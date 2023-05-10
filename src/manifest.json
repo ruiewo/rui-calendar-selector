@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "rui-calendar-selector",
+  "version": "0.1.0",
+  "description": "",
+  "icons": {
+    "128": "app.png"
+  },
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": ["https://calendar.google.com/calendar/*"],
+      "js": ["index.js"],
+      "css": ["index.css"]
+    }
+  ],
+  "permissions": ["storage"]
+}
