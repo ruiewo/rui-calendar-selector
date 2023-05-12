@@ -102,7 +102,7 @@ const storage = (() => {
 
   async function getGroups() {
     const data = await chrome.storage.sync.get(calendarGroupKey)
-    return data[calendarGroupKey]
+    return data[calendarGroupKey] ?? []
   }
 
   async function addGroup(groupName, list) {
