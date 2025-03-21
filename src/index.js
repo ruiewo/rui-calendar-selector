@@ -4,7 +4,7 @@ const ui = (() => {
     return [...myList.querySelectorAll('input[aria-label]'), ...otherList.querySelectorAll('input[aria-label]')]
   }
 
-  function updateCalendarState(activeList = []) {
+  function checkCalendars(activeList) {
     getCalendars().forEach((input) => {
       const state = activeList.includes(input.getAttribute('aria-label'))
       if (state !== input.checked) {
@@ -13,10 +13,36 @@ const ui = (() => {
     })
   }
 
+  async function updateCalendarState(activeList) {
+    const sidebarRoot = getSidebarRoot()
+    let canScroll = true
+
+    do {
+      checkCalendars(activeList)
+      canScroll = await scroll(sidebarRoot)
+    } while (canScroll)
+  }
+
   function getActiveCalendars() {
     return getCalendars()
       .filter((x) => x.checked)
       .map((x) => x.getAttribute('aria-label'))
+  }
+
+  function getSidebarRoot() {
+    return document.querySelector('h1').closest('div')
+  }
+
+  async function scroll(element) {
+    const visibleHeight = element.scrollTop + element.clientHeight
+    const canScroll = Math.abs(element.scrollHeight - visibleHeight) > 10
+
+    if (canScroll) {
+      element.scroll({ top: visibleHeight, behavior: 'smooth' })
+      await sleep(300)
+    }
+
+    return canScroll
   }
 
   async function addGroup() {
@@ -28,7 +54,7 @@ const ui = (() => {
   }
 
   async function deleteGroup(groupName) {
-    await storage.deleteGroup(groupName, getActiveCalendars())
+    await storage.deleteGroup(groupName)
     await render()
   }
 
@@ -111,6 +137,8 @@ const htmlToNode = (html) => {
   template.innerHTML = html
   return template.content.firstChild
 }
+
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time))
 
 async function main() {
   await ui.render(true)
