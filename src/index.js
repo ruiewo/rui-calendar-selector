@@ -1,28 +1,22 @@
 const ui = (() => {
   function getCalendars() {
     const [myList, otherList] = document.querySelectorAll(`[role="list"]`)
-    return [...myList.children, ...otherList.children]
+    return [...myList.querySelectorAll('input[aria-label]'), ...otherList.querySelectorAll('input[aria-label]')]
   }
 
   function updateCalendarState(activeList = []) {
-    for (const dom of getCalendars()) {
-      const state = activeList.includes(dom.querySelector('span').textContent)
-      const checkbox = dom.querySelector('input')
-      if (state !== checkbox.checked) {
-        checkbox.click()
+    getCalendars().forEach((input) => {
+      const state = activeList.includes(input.getAttribute('aria-label'))
+      if (state !== input.checked) {
+        input.click()
       }
-    }
+    })
   }
 
   function getActiveCalendars() {
-    const activeList = []
-    for (const cal of getCalendars()) {
-      if (cal.querySelector('input').checked) {
-        activeList.push(cal.querySelector('span').textContent)
-      }
-    }
-
-    return activeList
+    return getCalendars()
+      .filter((x) => x.checked)
+      .map((x) => x.getAttribute('aria-label'))
   }
 
   async function addGroup() {
@@ -44,7 +38,7 @@ const ui = (() => {
     const ul = document.createElement('ul')
     ul.classList.add('rui-groups')
     for (const { groupName, list } of groups) {
-      const li = document.createElement('li')
+      const li = htmlToNode('<li><span></span><div class="deleteButton"></div></li>')
       li.onclick = (e) => {
         if (e.target.closest('.deleteButton')) {
           deleteGroup(groupName)
@@ -53,34 +47,18 @@ const ui = (() => {
         }
       }
 
-      const span = document.createElement('span')
-      span.textContent = groupName
-
-      const button = document.createElement('div')
-      button.classList.add('deleteButton')
-
-      li.appendChild(span)
-      li.appendChild(button)
-
+      li.querySelector('span').textContent = groupName
       ul.appendChild(li)
     }
 
-    const li = document.createElement('li')
-    li.classList.add('addRow')
-    const addButton = document.createElement('div')
-    addButton.classList.add('addButton')
-    addButton.textContent = '+Add'
-    addButton.onclick = addGroup
-    li.appendChild(addButton)
+    const li = htmlToNode('<li class="addRow"><div class="addButton">+Add</div></li>')
+    li.querySelector('.addButton').onclick = addGroup
     ul.appendChild(li)
 
-    const header = document.createElement('div')
-    header.textContent = `Calendar Group`
-    header.classList.add('rui-header')
+    const header = htmlToNode('<div class="rui-header">Calendar Group</div>')
 
     if (isInit) {
-      const wrapper = document.createElement('div')
-      wrapper.id = 'rui-calendar-selector'
+      const wrapper = htmlToNode('<div id="rui-calendar-selector"></div>')
       wrapper.appendChild(header)
       wrapper.appendChild(ul)
 
@@ -127,6 +105,12 @@ const storage = (() => {
     deleteGroup,
   }
 })()
+
+const htmlToNode = (html) => {
+  const template = document.createElement('template')
+  template.innerHTML = html
+  return template.content.firstChild
+}
 
 async function main() {
   await ui.render(true)

@@ -2,7 +2,6 @@
   "name": "rui-calendar-selector",
   "version": "0.0.0",
   "devDependencies": {
-    "eslint": "^8.40.0",
-    "prettier": "^2.8.8"
+    "@biomejs/biome": "1.9.4"
   }
 }
