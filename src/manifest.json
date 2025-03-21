@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Rui Calendar Selector",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "grouping calendars for google calendar.",
   "icons": {
     "16": "icon16.png",
