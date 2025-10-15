@@ -1,6 +1,6 @@
 const ui = (() => {
   function getCalendars() {
-    const [myList, otherList] = document.querySelectorAll(`[role="list"]`)
+    const [_reservation, myList, otherList] = document.querySelectorAll(`[role="list"]`)
     return [...myList.querySelectorAll('input[aria-label]'), ...otherList.querySelectorAll('input[aria-label]')]
   }
 
